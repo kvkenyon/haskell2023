@@ -23,4 +23,4 @@ takeWhile' :: (a -> Bool) -> [a] -> [a]
 takeWhile' _ [] = []
 takeWhile' p (x:xs) = if p x then x:takeWhile' p xs else [] 
 
-sqrtSum = length . takeWhile' (< 1000) . scanl (+) 0 $ map  sqrt [1..]
+sqrtSum = length . takeWhile' (< 1000) . scanl (+) 0 $ map sqrt [1..]
