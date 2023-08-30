@@ -2,6 +2,7 @@
 module LogAnalysis where
 
 import Log
+import System.IO (openFile, IOMode (WriteMode), hClose, hPrint)
 
 parseMessage' :: [String] -> LogMessage
 parseMessage' ("E":sev:ts:msg) = LogMessage (Error $ read sev) (read ts) (unwords msg)
@@ -32,11 +33,11 @@ inOrder Leaf = []
 inOrder (Node left lm right) = inOrder left ++ [lm] ++ inOrder right
 
 isSevere :: LogMessage -> Bool
-isSevere (LogMessage (Error sev) _ _) = sev > 50
+isSevere (LogMessage (Error sev) _ _) = sev > 45 
 isSevere _ = False
 
 isInfo :: LogMessage -> Bool
-isInfo (LogMessage Info _ _) = True
+isInfo (LogMessage Warning _ _) = True
 isInfo _ = False
 
 getMessage :: LogMessage -> String
@@ -49,6 +50,8 @@ whatWentWrong f lms = map getMessage $ filter f $ inOrder $ build lms
 main :: IO ()
 main = 
     do 
-        logs <- testParse parse  10 "error.log"
-        print $ inOrder $ build logs 
-
+        out <- testWhatWentWrong parse (whatWentWrong isInfo) "error.log"
+        let out2 = foldl (\acc x -> acc ++ x:["\n"]) [] out
+        outh <- openFile "warn.log" WriteMode
+        hPrint outh out2
+        hClose outh
