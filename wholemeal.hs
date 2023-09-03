@@ -1,3 +1,6 @@
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+
+{-# HLINT ignore "Use map" #-}
 import Data.List (nub, sort)
 
 fun1 :: [Integer] -> Integer

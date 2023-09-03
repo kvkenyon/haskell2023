@@ -1,3 +1,6 @@
 rpn.hi
 rpn
 rpn.o
+quickestPath
+quickestPath.hi
+.gitignore
