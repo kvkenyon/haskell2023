@@ -3,5 +3,4 @@ rpn
 rpn.o
 quickestPath
 quickestPath.hi
-.gitignore
 quickestPath.o
