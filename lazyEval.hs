@@ -65,7 +65,7 @@ positive = streamFromSeed (+ 1) 1
 interleaveStreams :: Stream a -> Stream a -> Stream a
 interleaveStreams (Cons x xs) (Cons y ys) = Cons x (Cons y (interleaveStreams xs ys))
 
----1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
+-- 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
 -- 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 42 44 46 48 50 52 54 56 58 60 62 64
 -- 1 2 1 3 1  2  1  4  1  2  1  3  1  2  1  5  1  2  1  3  1  2  1  4  1  2  1  3  1  2  1  6
 --   2 . 3 .  2 .   4 .   2 .   3 .   2 .   5 .   2     3 .   2     4     2     3     2     6
