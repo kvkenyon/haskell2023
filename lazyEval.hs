@@ -51,7 +51,7 @@ streamToList (Cons x rest) = x : streamToList rest
 
 instance Show a => Show (Stream a) where
   show :: Show a => Stream a -> String
-  show stream = show . take 32 $ streamToList stream
+  show stream = show . take 100 $ streamToList stream
 
 streamMap :: (a -> b) -> Stream a -> Stream b
 streamMap = fmap
@@ -145,3 +145,30 @@ instance Fractional (Stream Integer) where
 
 fibs4 :: Stream Integer
 fibs4 = x / (1 - x - x ^ 2)
+
+-- Ex. 7 Logarithmic Fib
+{--
+a b * a b
+c d   c d
+= (aa + bc) (a x * b y + b x * d y) (ca + dc) (cb + dd)
+--}
+data Matrix = Matrix
+  { -- row 1
+    a :: Integer,
+    b :: Integer,
+    -- row 2
+    c :: Integer,
+    d :: Integer
+  }
+  deriving (Show)
+
+instance Num Matrix where
+  (*) x y =
+    Matrix
+      (a x * a y + b x * c y)
+      (a x * b y + b x * d y)
+      (c x * a y + d x * c y)
+      (c x * b y + d x * d y)
+
+logFib :: Integer -> Integer
+logFib n = b (Matrix 1 1 1 0 ^ n)
