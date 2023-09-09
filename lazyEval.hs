@@ -1,3 +1,8 @@
+{-# LANGUAGE FlexibleInstances #-}
+{-# OPTIONS_GHC -Wno-missing-methods #-}
+
+module Lazy where
+
 import Data.List (foldl')
 
 -- Ex. 1
@@ -108,3 +113,35 @@ testRuler =
     and $ testRuler' 100000,
     and $ testRuler' 1000000
   ]
+
+-- Ex. 6
+
+x :: Stream Integer
+x = Cons 0 (Cons 1 $ streamRepeat 0)
+
+mul :: Integer -> Stream Integer -> Stream Integer
+mul a (Cons b b') = Cons (a * b) (mul a b')
+
+instance Num (Stream Integer) where
+  negate :: Stream Integer -> Stream Integer
+  negate (Cons x xs) = Cons (-1 * x) (negate xs)
+
+  (+) :: Stream Integer -> Stream Integer -> Stream Integer
+  (+) (Cons x xs) (Cons y ys) = Cons (x + y) $ xs + ys
+
+  (*) :: Stream Integer -> Stream Integer -> Stream Integer
+  (*) (Cons a0 a') b@(Cons b0 b') = Cons (a0 * b0) (mul a0 b' + a' * b)
+
+  fromInteger :: Integer -> Stream Integer
+  fromInteger n = Cons n $ streamRepeat 0
+
+-- Q = (a0/b0) + x((1/b0)(A' − QB'))
+q :: Stream Integer -> Stream Integer -> Stream Integer
+q a@(Cons a0 a') b@(Cons b0 b') = Cons (a0 `div` b0) (mul (1 `div` b0) (a' + (negate (q a b) * b')))
+
+instance Fractional (Stream Integer) where
+  (/) :: Stream Integer -> Stream Integer -> Stream Integer
+  (/) = q
+
+fibs4 :: Stream Integer
+fibs4 = x / (1 - x - x ^ 2)
