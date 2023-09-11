@@ -5,6 +5,40 @@ module JoinList where
 import Sized
 import Text.XHtml (lang)
 
+newtype Score = Score Int
+  deriving (Eq, Ord, Show, Num)
+
+getScore :: Score -> Int
+getScore (Score x) = x
+
+instance Semigroup Score where
+  (<>) :: Score -> Score -> Score
+  (<>) = (+)
+
+instance Monoid Score where
+  mempty :: Score
+  mempty = Score 0
+  mappend :: Score -> Score -> Score
+  mappend = (<>)
+
+onePoint = ['A', 'a', 'E', 'e', 'I', 'i', 'L', 'l', 'N', 'n', 'O', 'o', 'R', 'r', 'S', 's', 'T', 't', 'U', 'u']
+
+twoPoint = ['D', 'd', 'G', 'g']
+
+threePoint = ['C', 'c', 'M', 'm', 'P', 'p']
+
+fourPoint = ['F', 'f', 'v', 'V', 'y', 'Y']
+
+fivePoint = ['K', 'k']
+
+eightPoint = ['X', 'x', 'J', 'j']
+
+tenPoint = ['Z', 'z', 'Q', 'q']
+
+score :: Char -> Score
+score 'A' = 1
+score 'a' = 1
+
 data JoinList m a where
   Empty :: JoinList m a
   Single :: m -> a -> JoinList m a
