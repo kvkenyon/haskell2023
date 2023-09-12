@@ -1,8 +1,9 @@
-{-# LANGUAGE FlexibleInstances          #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+
 module Sized where
 
-import           Data.Monoid
+import Data.Monoid
 
 newtype Size = Size Int
   deriving (Eq, Ord, Show, Num)
@@ -21,12 +22,12 @@ instance Sized Size where
 --   (Foo, (Bar, Size))
 --   ...
 -- are all instances of Sized.
-instance Sized b => Sized (a,b) where
+instance Sized b => Sized (a, b) where
   size = size . snd
 
 instance Semigroup Size where
   (<>) = (+)
 
 instance Monoid Size where
-  mempty  = Size 0
-  mappend = (+)
+  mempty = Size 0
+  mappend = (<>)
