@@ -6,6 +6,7 @@ module AParser where
 
 import Control.Applicative
 import Data.Char
+import Data.Maybe
 
 -- A parser for a value of type a is a function which takes a String
 -- represnting the input to be parsed, and succeeds or fails; if it
@@ -60,9 +61,34 @@ posInt = Parser f
 first :: (a -> b) -> (a, c) -> (b, c)
 first g (x, y) = (g x, y)
 
--- instance Functor Parser where
---   fmap :: (a -> b) -> Parser a -> Parser b
---   fmap g (Parser h) = Parser f
---     where
---       f [] = Nothing
---       f (Just (x, y)) = h x
+instance Functor Parser where
+  fmap :: (a -> b) -> Parser a -> Parser b
+  fmap g p = Parser f
+    where
+      f [] = Nothing
+      f xs =
+        case runParser p xs of
+          Nothing -> Nothing
+          Just ps -> Just $ first g ps
+
+instance Applicative Parser where
+  pure :: a -> Parser a
+  pure x = Parser f
+    where
+      f [] = Nothing
+      f xs = Just (x, xs)
+  (<*>) :: Parser (a -> b) -> Parser a -> Parser b
+  (<*>) p1 p2 = Parser f -- (Parser (b->('a', b))) <*> char "b"
+    where
+      f [] = Nothing
+      f xs = case runParser p1 xs of -- Just (b->('a', b), "bcdef")
+        Nothing -> Nothing
+        Just (y, ys) -> case runParser p2 ys of -- Just ('a', "bcdef")
+          Nothing -> Nothing
+          Just (z, zs) -> Just (y z, zs) -- Just ('b')
+
+abParser :: Parser (Char, Char)
+abParser = (,) <$> char 'a' <*> char 'b'
+
+abParser_ :: Parser ()
+abParser_ = (\_ _ -> ()) <$> char 'a' <*> char 'b'
