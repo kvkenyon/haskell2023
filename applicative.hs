@@ -10,3 +10,15 @@ instance Applicative Box where
   pure _ = EmptyBox
   (<*>) :: Box (a -> b) -> Box a -> Box b
   (<*>) (Package f) (Package g) = Package (f g)
+
+type Name = String
+
+data Employee = Employee
+  { name :: Name,
+    phone :: String
+  }
+
+maybeEmployee :: Maybe Name -> Maybe String -> Maybe Employee
+maybeEmployee Nothing _ = Nothing
+maybeEmployee _ Nothing = Nothing
+maybeEmployee (Just name) (Just phone) = Just $ Employee name phone
