@@ -74,7 +74,6 @@ instance Functor Parser where
           Nothing -> Nothing
           Just ps -> Just $ first g ps
 
--- Just (12, "13") -> Just ((:[12]), "13")
 instance Applicative Parser where
   pure :: a -> Parser a
   pure x = Parser f
@@ -82,14 +81,12 @@ instance Applicative Parser where
       f [] = Nothing
       f xs = Just (x, xs)
   (<*>) :: Parser (a -> b) -> Parser a -> Parser b
-  (<*>) p1 p2 = Parser f -- (Parser (b->('a', b))) <*> char "b"
+  (<*>) (Parser p1) p2 = Parser f
     where
       f [] = Nothing
-      f xs = case runParser p1 xs of -- Just (b->('a', b), "bcdef")
+      f xs = case p1 xs of
         Nothing -> Nothing
-        Just (y, ys) -> case runParser p2 ys of -- Just ('a', "bcdef")
-          Nothing -> Nothing
-          Just (z, zs) -> Just (y z, zs) -- Just ('b')
+        Just (y, ys) -> runParser (y <$> p2) ys
 
 instance Alternative Parser where
   empty :: Parser a
@@ -97,15 +94,16 @@ instance Alternative Parser where
     where
       f _ = Nothing
   (<|>) :: Parser a -> Parser a -> Parser a
-  p1 <|> p2 = Parser f
-    where
-      f xs = runParser p1 xs <|> runParser p2 xs
+  (Parser p1) <|> (Parser p2) = Parser $ liftA2 (<|>) p1 p2
+
+pair :: (Applicative f) => f a -> f b -> f (a, b)
+pair = liftA2 (,)
 
 abParser :: Parser (Char, Char)
-abParser = (,) <$> char 'a' <*> char 'b'
+abParser = pair (char 'a') (char 'b')
 
 abParser_ :: Parser ()
-abParser_ = (\_ _ -> ()) <$> char 'a' <*> char 'b'
+abParser_ = liftA2 (\_ _ -> ()) (char 'a') (char 'b')
 
 intPair :: Parser [Integer]
 intPair = (\x _ -> reverse . (: [x])) <$> posInt <*> char ' ' <*> posInt
