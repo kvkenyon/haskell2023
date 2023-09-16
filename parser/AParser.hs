@@ -1,6 +1,9 @@
 {- CIS 194 HW 10
    due Monday, 1 April
 -}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+
+{-# HLINT ignore "Use void" #-}
 
 module AParser where
 
@@ -71,6 +74,7 @@ instance Functor Parser where
           Nothing -> Nothing
           Just ps -> Just $ first g ps
 
+-- Just (12, "13") -> Just ((:[12]), "13")
 instance Applicative Parser where
   pure :: a -> Parser a
   pure x = Parser f
@@ -87,8 +91,24 @@ instance Applicative Parser where
           Nothing -> Nothing
           Just (z, zs) -> Just (y z, zs) -- Just ('b')
 
+instance Alternative Parser where
+  empty :: Parser a
+  empty = Parser f
+    where
+      f _ = Nothing
+  (<|>) :: Parser a -> Parser a -> Parser a
+  p1 <|> p2 = Parser f
+    where
+      f xs = runParser p1 xs <|> runParser p2 xs
+
 abParser :: Parser (Char, Char)
 abParser = (,) <$> char 'a' <*> char 'b'
 
 abParser_ :: Parser ()
 abParser_ = (\_ _ -> ()) <$> char 'a' <*> char 'b'
+
+intPair :: Parser [Integer]
+intPair = (\x _ -> reverse . (: [x])) <$> posInt <*> char ' ' <*> posInt
+
+intOrUppercase :: Parser ()
+intOrUppercase = () <$ posInt <|> () <$ satisfy isUpper
