@@ -68,7 +68,6 @@ instance Functor Parser where
   fmap :: (a -> b) -> Parser a -> Parser b
   fmap g p = Parser f
     where
-      f [] = Nothing
       f xs =
         case runParser p xs of
           Nothing -> Nothing
@@ -78,7 +77,6 @@ instance Applicative Parser where
   pure :: a -> Parser a
   pure x = Parser f
     where
-      f [] = Nothing
       f xs = Just (x, xs)
   (<*>) :: Parser (a -> b) -> Parser a -> Parser b
   (<*>) (Parser p1) p2 = Parser f

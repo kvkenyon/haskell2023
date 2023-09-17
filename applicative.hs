@@ -28,14 +28,6 @@ maybeEmployee (Just name) (Just phone) = Just $ Employee name phone
 (*>) :: Applicative f => f a -> f b -> f b
 (*>) fa fb = fb
 
-{--
-
-Just 3 and a Just [4] -> Just [3,4]
-
-liftA2 (:) Just 3 Just 4
-
---}
-
 sequenceA' :: Applicative f => [f a] -> f [a]
 sequenceA' = foldr (liftA2 (:)) (pure [])
 
