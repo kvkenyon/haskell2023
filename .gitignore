@@ -1,6 +1,2 @@
-rpn.hi
-rpn
-rpn.o
-quickestPath
-quickestPath.hi
-quickestPath.o
+*.hi
+*.o
