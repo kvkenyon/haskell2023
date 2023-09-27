@@ -25,7 +25,7 @@ source-repository head
 
 library
   exposed-modules:
-      Instruction
+      AbstractMachine
       Parsing
   other-modules:
       Paths_arithcompiler
