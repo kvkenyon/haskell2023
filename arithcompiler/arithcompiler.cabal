@@ -26,7 +26,10 @@ source-repository head
 library
   exposed-modules:
       AbstractMachine
+      Compiler
+      Interpreter
       Parsing
+      Syntax
   other-modules:
       Paths_arithcompiler
   hs-source-dirs:
