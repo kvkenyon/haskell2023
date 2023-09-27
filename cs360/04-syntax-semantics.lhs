@@ -77,6 +77,31 @@ Example strings that do not match `<integer>`:
   examples of strings that match, and three more examples that do not
   match.
 
+  The following match <mirror>
+
+  "LLL.RRR"
+  "LLLLL.RRRRR"
+  "LLLLLL.RRRRRR"
+
+  The following don't match <mirror>
+  "L"
+  "R"
+  "L."
+
+  The following match <tree>
+  "(#(##))"
+  "(#(#(#)))"
+  "((##)(##))"
+
+  The following don't match <tree>
+  "(###)"
+  "Q"
+  "(#(#w))"
+
+  "++1"
+  "--1"
+  "1+2"
+
 * What does `|` mean?  (Note for this question and the next: this is
   **not** Haskell syntax!  Just say what you think these notations mean
   based on the examples above.)
