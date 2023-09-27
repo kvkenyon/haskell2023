@@ -7,11 +7,11 @@ cabal-version: 1.12
 name:           arithcompiler
 version:        0.1.0.0
 description:    Please see the README on GitHub at <https://github.com/githubuser/arithcompiler#readme>
-homepage:       https://github.com/githubuser/arithcompiler#readme
-bug-reports:    https://github.com/githubuser/arithcompiler/issues
-author:         Author name here
-maintainer:     example@example.com
-copyright:      2023 Author name here
+homepage:       https://github.com/kvkenyon/arithcompiler#readme
+bug-reports:    https://github.com/kvkenyon/arithcompiler/issues
+author:         Kevin Kenyon
+maintainer:     kvkenyon@gmail.com
+copyright:      2023 Kevin Kenyon
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
@@ -21,10 +21,11 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/githubuser/arithcompiler
+  location: https://github.com/kvkenyon/arithcompiler
 
 library
   exposed-modules:
+      Instruction
       Parsing
   other-modules:
       Paths_arithcompiler
