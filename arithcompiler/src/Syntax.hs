@@ -97,7 +97,22 @@ prettyArith1 (Bin op left right) = "(" ++ prettyArith1 left ++ show op ++ pretty
 
 prettyPrec :: Precedence -> Associativity -> Arith -> String
 prettyPrec _ _ (Lit x) = show x
-prettyPrec p a (Bin op l r) =
-  if p >= prec op
-    then "(" ++ prettyPrec (prec op) (assoc op) l ++ show op ++ prettyPrec (prec op) (assoc op) r ++ ")"
-    else prettyPrec (prec op) (assoc op) l ++ show op ++ prettyPrec (prec op) (assoc op) r
+prettyPrec _ _ (Bin op l r) = prettyLeft p a l ++ show op ++ prettyRight p a r
+  where
+    p = prec op
+    a = assoc op
+
+prettyLeft :: Precedence -> Associativity -> Arith -> String
+prettyLeft _ _ (Lit x) = show x
+prettyLeft p _ (Bin op l r)
+  | p <= prec op = prettyLeft (prec op) (assoc op) l ++ show op ++ prettyRight (prec op) (assoc op) r
+  | otherwise = "(" ++ prettyLeft (prec op) (assoc op) l ++ show op ++ prettyRight (prec op) (assoc op) r ++ ")"
+
+prettyRight :: Precedence -> Associativity -> Arith -> String
+prettyRight _ _ (Lit x) = show x
+prettyRight p L (Bin op l r)
+  | p >= prec op = "(" ++ prettyLeft (prec op) (assoc op) l ++ show op ++ prettyRight (prec op) (assoc op) r ++ ")"
+  | otherwise = prettyLeft (prec op) (assoc op) l ++ show op ++ prettyRight (prec op) (assoc op) r
+prettyRight p R (Bin op l r)
+  | p > prec op = "(" ++ prettyLeft (prec op) (assoc op) l ++ show op ++ prettyRight (prec op) (assoc op) r ++ ")"
+  | otherwise = prettyLeft (prec op) (assoc op) l ++ show op ++ prettyRight (prec op) (assoc op) r

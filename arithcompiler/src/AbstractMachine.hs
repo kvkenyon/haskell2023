@@ -1,4 +1,4 @@
-module AbstractMachine (Instruction (PUSH, ADD, SUB, MUL), run) where
+module AbstractMachine (Instruction (PUSH, ADD, SUB, MUL), run, Program) where
 
 {--
 Our imaginary machine is quite simple. It keeps track of a list of instructions to execute,
@@ -16,6 +16,7 @@ data Instruction
   | ADD
   | SUB
   | MUL
+  deriving (Show)
 
 type Program = [Instruction]
 

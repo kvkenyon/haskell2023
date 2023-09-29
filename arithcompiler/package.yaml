@@ -23,6 +23,7 @@ dependencies:
   - base
   - mtl
   - parsec
+  - hspec
 
 ghc-options:
   - -Wall
