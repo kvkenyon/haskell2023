@@ -10,3 +10,4 @@ interpOp :: Op -> Integer -> Integer -> Integer
 interpOp Plus = (+)
 interpOp Minus = (-)
 interpOp Times = (*)
+interpOp Exp = (^)
