@@ -13,7 +13,7 @@ cabal-version:       >=1.10
 
 executable calc
   main-is:             CalcREPL.hs
-  other-modules:       Calc, Parsing2
+  other-modules:       Calc, Parsing2, Syntax, Parser, Interpreter
   other-extensions:    GADTs
   build-depends:       base,  haskeline, parsec, containers
   default-language:    Haskell2010
