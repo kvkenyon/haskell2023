@@ -24,6 +24,14 @@ operator = getReservedOp lexer
 parseArithAtom :: Parser ArithE
 parseArithAtom = LitE <$> getNaturalOrFloat lexer
 
+parseConstant :: C -> Parser ArithE
+parseConstant c = do
+  getSymbol lexer (constSymbol c)
+  return (Const c)
+
+parseConstants :: Parser ArithE
+parseConstants = parseConstant E <|> parseConstant Pi
+
 parseParen :: Parser ArithE
 parseParen = do
   whiteSpace lexer
@@ -34,6 +42,56 @@ parseParen = do
   char ')'
   whiteSpace lexer
   return (Par LParen p RParen)
+
+parseFunc :: F -> Parser ArithE
+parseFunc f = do
+  whiteSpace lexer
+  s <- getSymbol lexer $ show f
+  whiteSpace lexer
+  char '('
+  whiteSpace lexer
+  p <- parseArith <|> parseFuncs
+  whiteSpace lexer
+  char ')'
+  whiteSpace lexer
+  return (Func f LParen p RParen)
+
+parseFuncs :: Parser ArithE
+parseFuncs =
+  parseFunc Sin
+    <|> parseFunc Cos
+    <|> parseFunc Tan
+    <|> parseFunc Log
+    <|> parseFunc Sqrt
+    <|> parseFunc Round
+
+binary name fun = Infix (do operator name; return fun)
+
+prefix name fun = Prefix (do operator name; return fun)
+
+term =
+  parseParen
+    <|> parseFuncs
+    <|> parseConstants
+    <|> parseArithAtom
+
+table =
+  [ [prefix "-" (Unary Neg)],
+    [binary "^" (Bin Exp) AssocRight],
+    [binary "*" (Bin Times) AssocLeft, binary "/" (Bin Div) AssocLeft],
+    [binary "+" (Bin Plus) AssocLeft, binary "-" (Bin Minus) AssocLeft]
+  ]
+
+parseArith :: Parser ArithE
+parseArith = buildExpressionParser table term
+
+parseConstantS :: C -> Parser String
+parseConstantS c = do
+  getSymbol lexer (constSymbol c)
+  return (show c)
+
+parseConstantsS :: Parser String
+parseConstantsS = parseConstantS E <|> parseConstantS Pi
 
 parseParenS :: Parser String
 parseParenS = do
@@ -46,43 +104,33 @@ parseParenS = do
   whiteSpace lexer
   return ("(" ++ p ++ ")")
 
-ppS :: Parser String
-ppS =
+parseFuncS :: F -> Parser String
+parseFuncS f = do
   whiteSpace lexer
-    >> char '('
-    >> whiteSpace lexer
-    >> parseString
-    >>= ( \p ->
-            whiteSpace lexer
-              >> char ')'
-              >> whiteSpace lexer
-              >> return ("(" ++ p ++ ")")
-        )
+  s <- getSymbol lexer $ show f
+  whiteSpace lexer
+  char '('
+  whiteSpace lexer
+  p <- parseString <|> parseFuncsS
+  whiteSpace lexer
+  char ')'
+  whiteSpace lexer
+  return (show f ++ "(" ++ p ++ ")")
 
-term =
-  parseParen
-    <|> parseArithAtom
+parseFuncsS :: Parser String
+parseFuncsS =
+  parseFuncS Sin
+    <|> parseFuncS Cos
+    <|> parseFuncS Tan
+    <|> parseFuncS Log
+    <|> parseFuncS Sqrt
+    <|> parseFuncS Round
 
-binary name fun = Infix (do operator name; return fun)
-
-prefix name fun = Prefix (do operator name; return fun)
-
-table =
-  [ [prefix "-" (Unary Neg)],
-    [binary "^" (Bin Exp) AssocRight],
-    [binary "*" (Bin Times) AssocLeft, binary "/" (Bin Div) AssocLeft],
-    [binary "+" (Bin Plus) AssocLeft, binary "-" (Bin Minus) AssocLeft]
-  ]
-
-parseArith :: Parser ArithE
-parseArith = buildExpressionParser table term
-
-strTerm = parseParenS <|> showDouble <$> number
+strTerm = parseParenS <|> parseFuncsS <|> parseConstantsS <|> showDouble <$> number
   where
     showDouble n
       | Left i <- n = show (fromIntegral i :: Double)
       | Right d <- n = show d
-    hasParens = string "(" >> parseString
 
 parseString :: Parser String
 parseString =

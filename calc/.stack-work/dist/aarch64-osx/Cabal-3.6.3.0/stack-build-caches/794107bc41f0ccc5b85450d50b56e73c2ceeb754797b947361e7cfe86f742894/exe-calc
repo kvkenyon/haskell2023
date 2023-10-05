@@ -3,12 +3,12 @@
 /Users/kevin/dev/haskell/calc/CalcREPL.hs:
   hash: 35bbd5ea0eeae4fea14c32238e6e431fbaf3edd30e26f92a9e8bf1393eb22abc
 /Users/kevin/dev/haskell/calc/Interpreter.hs:
-  hash: b848a4efed72e0f65c7c0b40973d5ff2994e9b85e300cf4d4d17ebda72715051
+  hash: d39128ef8e14aabfce259d150ad30f526b9363fa834af54d10034785a8bd4ed2
 /Users/kevin/dev/haskell/calc/Parser.hs:
-  hash: cc8df0fb5e866dc7dacab90c35ac88d3a89ac56dd36c46e828de2f06bc213528
+  hash: f68d6e89064fa08ea805fb5c24017470195e39f18f3e8485b204955bc22fec10
 /Users/kevin/dev/haskell/calc/Parsing2.hs:
   hash: 9d96d124dd33d6eaf138f6abc83e289da138165f94d9ec6246445703755c9350
 /Users/kevin/dev/haskell/calc/Syntax.hs:
-  hash: b84901c41e1b03bc5ba422684a32a9fb3d0cc567e6d2aef14d8e7c6e0997f8f4
+  hash: 4d57b794630467b3e3f461bf55a5a070199c7772db47548fd88c666c6eefcb74
 /Users/kevin/dev/haskell/calc/calc.cabal:
   hash: 2289eef14d0b0d910d3b904446fc9495ff9c7f152b41b774d5602bb71edefa1c
