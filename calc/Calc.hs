@@ -9,10 +9,10 @@ import Parser (arith, pretty)
 description :: String
 description =
   unlines
-    [ "Welcome to my calculator.",
-      "This boring message is being shown because",
-      "I have not bothered to update it.",
-      "Features this calculator supports: none.",
+    [ "KWK Limited Company",
+      "The Rand Calculator",
+      "Ultimate computational computing machine",
+      "Features this calculator supports: Add, Sub, Exp, Times, Neg and more.",
       "Type an expression, :help, or :quit."
     ]
 
