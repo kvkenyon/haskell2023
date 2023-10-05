@@ -2,16 +2,16 @@
 
 module Calc where
 
+import ArithParser (arith)
 import qualified Data.Map as M
 import Interpreter (interpret)
-import Parser (arith, pretty)
+import PrettyParser (pretty)
 
 description :: String
 description =
   unlines
     [ "KWK Limited Company",
-      "The Rand Calculator",
-      "Ultimate computational computing machine",
+      "The Calculator",
       "Features this calculator supports: Add, Sub, Exp, Times, Neg and more.",
       "Type an expression, :help, or :quit."
     ]
@@ -20,7 +20,8 @@ helpMsg :: String
 helpMsg =
   unlines
     [ "You can use integers or floating point values,",
-      "negation, or standard arithmetic operators + - * / ^ ."
+      "negation, or standard arithmetic operators + - * / ^ . Calc",
+      "also supports functions: sin, cos, tan, sqrt, log, and round. Constants e and pi."
     ]
 
 calc :: String -> String
