@@ -52,10 +52,12 @@ ppS =
     >> char '('
     >> whiteSpace lexer
     >> parseString
-    >>= (\p -> whiteSpace lexer >> return p)
-    >>= (\p -> char ')' >> return p)
-    >>= (\p -> whiteSpace lexer >> return p)
-    >>= (\p -> return ("(" ++ p ++ ")"))
+    >>= ( \p ->
+            whiteSpace lexer
+              >> char ')'
+              >> whiteSpace lexer
+              >> return ("(" ++ p ++ ")")
+        )
 
 term =
   parseParen
