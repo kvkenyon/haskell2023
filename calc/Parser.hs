@@ -46,6 +46,17 @@ parseParenS = do
   whiteSpace lexer
   return ("(" ++ p ++ ")")
 
+ppS :: Parser String
+ppS =
+  whiteSpace lexer
+    >> char '('
+    >> whiteSpace lexer
+    >> parseString
+    >>= (\p -> whiteSpace lexer >> return p)
+    >>= (\p -> char ')' >> return p)
+    >>= (\p -> whiteSpace lexer >> return p)
+    >>= (\p -> return ("(" ++ p ++ ")"))
+
 term =
   parseParen
     <|> parseArithAtom
