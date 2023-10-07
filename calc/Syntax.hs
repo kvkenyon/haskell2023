@@ -3,6 +3,8 @@
 
 module Syntax where
 
+import Data.Complex (Complex)
+
 data Op where
   Plus :: Op
   Minus :: Op
@@ -59,6 +61,7 @@ instance Show Paren where
 
 data ArithE where
   LitE :: Either Integer Double -> ArithE
+  Cx :: Complex Double -> ArithE
   Const :: C -> ArithE
   Func :: F -> Paren -> ArithE -> Paren -> ArithE
   Unary :: Op -> ArithE -> ArithE

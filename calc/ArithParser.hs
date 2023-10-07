@@ -1,5 +1,6 @@
 module ArithParser where
 
+import Data.Complex
 import Parser (binary, lexer, number, prefix)
 import Parsing2
   ( Assoc (AssocLeft, AssocRight),
@@ -8,6 +9,7 @@ import Parsing2
     char,
     eof,
     getNaturalOrFloat,
+    getReserved,
     getSymbol,
     getWhiteSpace,
     parse,
@@ -15,7 +17,7 @@ import Parsing2
   )
 import Syntax (ArithE (..), C (..), F (..), Op (..), Paren (..), constSymbol)
 import qualified Text.Parsec as P
-import Text.Parsec.Token (GenTokenParser (whiteSpace))
+import Text.Parsec.Token (GenTokenParser (reserved, whiteSpace))
 
 parseArithAtom :: Parser ArithE
 parseArithAtom = LitE <$> getNaturalOrFloat lexer
@@ -27,6 +29,14 @@ parseConstant c = do
 
 parseConstants :: Parser ArithE
 parseConstants = parseConstant E <|> parseConstant Pi
+
+parseComplex :: Parser ArithE
+parseComplex = do
+  integerOrDouble <- number
+  getReserved lexer "i"
+  case integerOrDouble of
+    Left i -> return (Cx $ 0 :+ fromIntegral i)
+    Right d -> return (Cx (0 :+ d))
 
 parseParen :: Parser ArithE
 parseParen = do
@@ -54,7 +64,8 @@ parseFunc f = do
 
 parseFuncs :: Parser ArithE
 parseFuncs =
-  parseFunc Sin
+  P.try
+    (parseFunc Sin)
     <|> parseFunc Cos
     <|> parseFunc Tan
     <|> parseFunc Log
@@ -65,6 +76,7 @@ term =
   parseParen
     <|> parseFuncs
     <|> parseConstants
+    <|> P.try parseComplex
     <|> parseArithAtom
 
 table =

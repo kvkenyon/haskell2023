@@ -1,5 +1,6 @@
 module PrettyParser where
 
+import Data.Complex (Complex ((:+)))
 import Parser (binary, lexer, number, prefix)
 import Parsing2
   ( Assoc (AssocLeft, AssocRight),
@@ -7,12 +8,13 @@ import Parsing2
     buildExpressionParser,
     char,
     eof,
+    getReserved,
     getSymbol,
     getWhiteSpace,
     parse,
     (<|>),
   )
-import Syntax (C (..), F (..), constSymbol)
+import Syntax (ArithE (Cx), C (..), F (..), constSymbol)
 import qualified Text.Parsec as P
 import Text.Parsec.Token (GenTokenParser (whiteSpace))
 
@@ -23,6 +25,14 @@ parseConstantS c = do
 
 parseConstantsS :: Parser String
 parseConstantsS = parseConstantS E <|> parseConstantS Pi
+
+parseComplexS :: Parser String
+parseComplexS = do
+  integerOrDouble <- number
+  getReserved lexer "i"
+  case integerOrDouble of
+    Left i -> return ((show . fromIntegral) i ++ "i")
+    Right d -> return (show d ++ "i")
 
 parseParenS :: Parser String
 parseParenS = do
@@ -50,14 +60,20 @@ parseFuncS f = do
 
 parseFuncsS :: Parser String
 parseFuncsS =
-  parseFuncS Sin
+  P.try (parseFuncS Sin)
     <|> parseFuncS Cos
     <|> parseFuncS Tan
     <|> parseFuncS Log
     <|> parseFuncS Sqrt
     <|> parseFuncS Round
 
-strTerm = parseParenS <|> parseFuncsS <|> parseConstantsS <|> showDouble <$> number
+strTerm =
+  parseParenS
+    <|> parseFuncsS
+    <|> parseConstantsS
+    <|> P.try parseComplexS
+    <|> showDouble
+    <$> number
   where
     showDouble n
       | Left i <- n = show (fromIntegral i :: Double)

@@ -1,4 +1,15 @@
 :q
+sqrt(1.0 + 3i)
+:q
+sqrt(1.0 + 3i)
+1 + 3i
+cos ( sin (tan (log (e))))
+:q
+cos ( sin (tan (log (e))))
+cos ( sin (tan (log (e))))
+log ( e ) + sin(pi)
+cos ( sin (tan (log (e))))
+:q
 cos ( sin (tan (log (e))))
 sin(1+2)
 sin()
@@ -87,14 +98,3 @@ sin (1.2)
 1+(2)+1
 1+(2)
 1+(2
-:q
-(3*5)
-(3*5)+3
-:q
-(3*5)+3
-(((3*5)  -   9) +   -8.3)
-(3*5)
-:q
-(3*5)
-3*5
-:q
