@@ -4,7 +4,6 @@
 module Main (main) where
 
 import qualified Data.Map as M
-import Data.Ratio (denominator)
 import Parsing
 
 data Arith where
