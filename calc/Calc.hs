@@ -3,8 +3,9 @@
 module Calc where
 
 import ArithParser (arith)
+import Data.Complex (imagPart, realPart)
 import qualified Data.Map as M
-import Interpreter (interpret)
+import Interpreter (DoubleOrComplex, interpret)
 import PrettyParser (pretty)
 
 description :: String
@@ -27,7 +28,12 @@ helpMsg =
 calc :: String -> String
 calc input =
   let result = (interpret . arith) input; s = prettyPrint input
-   in s ++ "\n" ++ "  =" ++ show result
+   in s ++ "\n" ++ "  =" ++ prettyPrintResult result
+
+prettyPrintResult :: Maybe DoubleOrComplex -> String
+prettyPrintResult Nothing = "Error"
+prettyPrintResult (Just (Left d)) = show d
+prettyPrintResult (Just (Right cd)) = (show . realPart) cd ++ " + " ++ (show . imagPart) cd ++ "i"
 
 prettyPrint :: String -> String
 prettyPrint input = out

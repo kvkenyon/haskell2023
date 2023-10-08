@@ -12,6 +12,7 @@ data Op where
   Div :: Op
   Exp :: Op
   Neg :: Op
+  As :: Op
 
 instance Show Op where
   show :: Op -> String
@@ -21,6 +22,7 @@ instance Show Op where
   show Div = "/"
   show Exp = "^"
   show Neg = "-"
+  show As = "as"
 
 data F where
   Sin :: F
@@ -59,12 +61,31 @@ instance Show Paren where
   show LParen = "("
   show RParen = ")"
 
+data Unit
+  = In
+  | Ft
+  | Mi
+  | M
+  | Cm
+  | Mm
+
+instance Show Unit where
+  show :: Unit -> String
+  show In = "in"
+  show Ft = "ft"
+  show Mi = "mi"
+  show M = "m"
+  show Cm = "cm"
+  show Mm = "mm"
+
 data ArithE where
   LitE :: Either Integer Double -> ArithE
+  LitUnit :: ArithE -> Unit -> ArithE
   Cx :: Complex Double -> ArithE
   Const :: C -> ArithE
   Func :: F -> Paren -> ArithE -> Paren -> ArithE
   Unary :: Op -> ArithE -> ArithE
   Bin :: Op -> ArithE -> ArithE -> ArithE
   Par :: Paren -> ArithE -> Paren -> ArithE
+  AsE :: Unit -> ArithE -> ArithE -> ArithE
   deriving (Show)
