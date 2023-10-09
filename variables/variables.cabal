@@ -29,6 +29,7 @@ library
       Parser
       Parsing
       Syntax
+      TypeChecker
   other-modules:
       Paths_variables
   autogen-modules:

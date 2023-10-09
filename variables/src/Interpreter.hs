@@ -11,15 +11,17 @@ import Prelude hiding (pred)
 
 type Env = M.Map String Value
 
-data InterpError = UndefinedVar String | DivByZero | TypeError
+type Ctx = M.Map String Type
+
+data InterpError = UndefinedVar String | DivByZero | ITypeError
 
 intOp :: (Integer -> Integer -> Integer) -> Value -> Value -> Either InterpError Integer
 intOp op (Number a) (Number b) = Right $ op a b
-intOp _ _ _ = Left TypeError
+intOp _ _ _ = Left ITypeError
 
 boolOp :: (Integer -> Integer -> Bool) -> Value -> Value -> Either InterpError Bool
 boolOp op (Number a) (Number b) = Right $ op a b
-boolOp _ _ _ = Left TypeError
+boolOp _ _ _ = Left ITypeError
 
 interpBool :: Env -> Arith -> Either InterpError Bool
 interpBool e (Bin Equal e1 e2) = interpArith e e1 >>= (\a -> interpArith e e2 >>= \b -> boolOp (==) a b)
@@ -55,4 +57,4 @@ interpArith e b@(Bin Less _ _) = interpBool e b >>= (return . Boolean)
 showInterpError :: InterpError -> String
 showInterpError (UndefinedVar x) = "Runtime Error: Undefined variable " ++ x
 showInterpError DivByZero = "Runtime Error: Division by zero"
-showInterpError TypeError = "Type Error"
+showInterpError ITypeError = "Type Error"

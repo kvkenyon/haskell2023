@@ -1,6 +1,19 @@
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE InstanceSigs #-}
 
 module Syntax where
+
+data Type = TypeInt | TypeBool
+  deriving (Show, Eq)
+
+data TypeError where
+  Undefined :: TypeError
+  TypeError :: Arith -> Type -> Type -> TypeError
+
+instance Show TypeError where
+  show :: TypeError -> String
+  show Undefined = "Undefined"
+  show (TypeError _ e a) = "Type Error: in <expr> expected type " ++ show e ++ " got type " ++ show a
 
 data Value where
   Number :: Integer -> Value
