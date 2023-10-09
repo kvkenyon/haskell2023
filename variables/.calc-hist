@@ -1,0 +1,15 @@
+let y = 3 in if (3 == y) < z/2 then (if z then 3 else False) else True
+let y == 3 in if (3 == y) < z/2 then (if z then 3 else False) else True
+if (3 == y) < z/2 then (if z then 3 else False) else True
+let x = 10 in x * x
+let x = 10 in (if (x < 12) then (if 5 == 5 then x + 19 else 12) else 8)
+let x = 10 in (if (x < 12) then (if 5 == 5 then x + 19 else 12) else 8
+if (3 == y) < z/2 then (if z then 3 else False) else True let x = 10 in (if (x < 12) then (if 5 == 5 then x + 19 else 12) else 8 let y = 2 in if 3 < 5 then False else y
+if (1+4) == 3 then True else False
+if (1+4) == 3 then 5 else 8
+if (1+2) == 3 then 5 else 8
+1+2
+1+2
+if (1+2) == 3 then 5 else 8
+if (1+2) == 3 then 5 else 8
+:help
