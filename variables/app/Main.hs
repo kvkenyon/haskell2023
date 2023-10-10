@@ -6,6 +6,7 @@ import Interpreter (interpArith, showInterpError)
 import Parser (arith)
 import Parsing (parse)
 import System.Console.Haskeline
+import TypeChecker (inferArith)
 
 description :: String
 description =
@@ -25,9 +26,11 @@ eval :: String -> String
 eval s = do
   case parse arith s of
     Left parseError -> show parseError
-    Right ast -> case interpArith M.empty ast of
-      Left interpreterError -> showInterpError interpreterError
-      Right val -> show val
+    Right ast -> case inferArith ast of
+      Left typeError -> show typeError
+      Right _ -> case interpArith M.empty ast of
+        Left interpreterError -> showInterpError interpreterError
+        Right val -> show val
 
 main :: IO ()
 main = putStrLn description >> runInputT settings loop
