@@ -5,6 +5,7 @@ import qualified Data.Map as M
 import Interpreter (interpArith, showInterpError)
 import Parser (arith)
 import Parsing (parse)
+import Syntax
 import System.Console.Haskeline
 import TypeChecker (inferArith)
 
@@ -28,9 +29,11 @@ eval s = do
     Left parseError -> show parseError
     Right ast -> case inferArith ast of
       Left typeError -> show typeError
-      Right _ -> case interpArith M.empty ast of
+      Right t -> case interpArith M.empty ast of
         Left interpreterError -> showInterpError interpreterError
-        Right val -> show val
+        Right val -> case t of
+          TypeInt -> show val
+          TypeBool -> show $ val /= 0
 
 main :: IO ()
 main = putStrLn description >> runInputT settings loop

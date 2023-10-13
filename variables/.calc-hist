@@ -1,3 +1,21 @@
+:q
+let y = 2 in let x = (if (3 < 4) then True else False) in x
+let y = 2 in let x = (if (3 < 2) then True else False) in x
+:q
+let y = 2 in let x = (if (3 < 2) then True else False) in x
+:q
+let y = 2 in let x = (if (3 < 2) then True else False) in x
+let y = 2 in let x = (if (3 < 2) then True else 9/0) in x
+let y = 2 in let x = (if (3 < 2) then True 9/0) in x
+let y = 2 in let x = (if (3 < 2) then 5+y else 9/0) in x
+let y = 2 in let x = (if (3 < 9) then 5+y else 9/0) in x
+let y = 2 in let x = (if (3 < True) then 5+y else 9/0) in x
+let y = 2 in let x = (if (3 < True) then 5+y else 9*10) in x
+let y = 2 in let x = (if (3 < 2) then 5+y else 9*10) in x
+let y = 2 in let x = (if (3 < 5) then 5+y else 9*10) in x
+let y = 2 in let x = (if (3 > 5) || (y*3 < 10) then 5+y else 9*10) in x
+if 1 + 3 == 3 then 3 else 4
+if 1 + 2 == 3 then 3 else 4
 if 1 + 2 == 3 then 3 else 4
 if 1 + 2 then 3 else 4
 1+ True

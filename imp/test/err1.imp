@@ -1,0 +1,13 @@
+bool j;
+input i;
+while i < 10 && !(i == ((-13) + 2) * 5 / 3) {
+  output i;
+  j := !j;
+  i := i+1
+};
+repeat (i+1) {
+  if j
+    then j := !j
+    else i := 2;
+  j := False || True
+}
