@@ -1,3 +1,5 @@
+{-# LANGUAGE RankNTypes #-}
+
 -- Version 1, 18 Oct 2016
 
 -- This is just like Parsing, but re-exports the general versions of
@@ -6,53 +8,80 @@
 
 module Parsing2
   ( -- * Lexing
-
-    TokenParser, makeTokenParser, emptyDef, GenLanguageDef(..)
-
-  , getIdentifier, getReserved, getReservedOp
-  , getNatural, getInteger, getFloat, getNaturalOrFloat
-  , getSymbol
-  , getWhiteSpace, getParens
+    TokenParser,
+    makeTokenParser,
+    emptyDef,
+    GenLanguageDef (..),
+    getIdentifier,
+    getReserved,
+    getReservedOp,
+    getNatural,
+    getInteger,
+    getFloat,
+    getNaturalOrFloat,
+    getSymbol,
+    getWhiteSpace,
+    getParens,
 
     -- * Parsing
-
-  , Parser, parse, parseFile, parseSome
-  , (<|>), (<$>), (<*>), (<$), (<*), (*>)
-  , module Text.Parsec.Expr
-  , module Text.Parsec.Combinator
-  , module Text.Parsec.Char
-  , try
+    Parser,
+    parse,
+    parseFile,
+    parseSome,
+    (<|>),
+    (<$>),
+    (<*>),
+    (<$),
+    (<*),
+    (*>),
+    module Text.Parsec.Expr,
+    module Text.Parsec.Combinator,
+    module Text.Parsec.Char,
+    try,
   )
-  where
+where
 
-import qualified Text.Parsec            as P
-import           Text.Parsec.Char
-import           Text.Parsec.Combinator
-import           Text.Parsec.Expr       hiding (Operator)
-import           Text.Parsec.Language   (emptyDef)
-import           Text.Parsec.Pos
-import           Text.Parsec.Prim       (Consumed (..), Reply (..), State (..),
-                                         runParsecT, try)
-import           Text.Parsec.String     (Parser, parseFromFile)
-import           Text.Parsec.Token
-
-import           Control.Applicative
-import           Data.Functor.Identity
+import Control.Applicative
+import Data.Functor.Identity
+import qualified Text.Parsec as P
+import Text.Parsec.Char
+import Text.Parsec.Combinator
+import Text.Parsec.Expr hiding (Operator)
+import Text.Parsec.Language (emptyDef)
+import Text.Parsec.Pos
+import Text.Parsec.Prim
+  ( Consumed (..),
+    Reply (..),
+    State (..),
+    runParsecT,
+    try,
+  )
+import Text.Parsec.String (Parser, parseFromFile)
+import Text.Parsec.Token
 
 ------------------------------------------------------------
 -- Lexing
 ------------------------------------------------------------
 
-getIdentifier     = identifier
-getReserved       = reserved
-getReservedOp     = reservedOp
-getNatural        = natural
-getInteger        = integer
-getFloat          = float
+getIdentifier = identifier
+
+getReserved = reserved
+
+getReservedOp = reservedOp
+
+getNatural = natural
+
+getInteger = integer
+
+getFloat = float
+
 getNaturalOrFloat = naturalOrFloat
-getSymbol         = symbol
-getWhiteSpace     = whiteSpace
-getParens         = parens
+
+getSymbol = symbol
+
+getWhiteSpace = whiteSpace
+
+getParens = parens
 
 -- For more, see http://hackage.haskell.org/package/parsec-3.1.11/docs/Text-Parsec-Token.html
 
@@ -70,7 +99,7 @@ parseSome :: Parser a -> String -> Either P.ParseError (a, String)
 parseSome p s =
   case runIdentity . getReply . runIdentity $ runParsecT p (State s (initialPos "") ()) of
     Ok a (State rest _ _) _ -> Right (a, rest)
-    Error err               -> Left err
+    Error err -> Left err
   where
     getReply (Consumed r) = r
-    getReply (Empty    r) = r
+    getReply (Empty r) = r

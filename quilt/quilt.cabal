@@ -15,8 +15,8 @@ executable quilt
   main-is:             QuiltREPL.hs
   other-modules:       Parsing2, Quilt
   other-extensions:    GADTs
-  build-depends:       base >=4.10 && <4.13,
-                       haskeline >=0.7 && <0.8,
+  build-depends:       base, 
+                       haskeline,
                        parsec,
                        containers,
                        mtl,

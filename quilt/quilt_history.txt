@@ -1,0 +1,6 @@
+:q
+[0.2, 0.8, 0.5]
+projects/explicitcolor.png
+red + blue
+:help
+asdf
