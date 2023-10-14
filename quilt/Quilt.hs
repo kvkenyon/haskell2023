@@ -5,6 +5,7 @@
 module Quilt where
 
 import qualified Data.Functor.Identity as I
+import qualified Data.Map as M
 import Parsing2
 import Text.Parsec (ParseError)
 import Text.Parsec.Expr
@@ -271,76 +272,90 @@ interpColor Blue = [0, 0, 1]
 interpColor Indigo = [75 / 255, 0, 130 / 255]
 interpColor Violet = [128 / 255, 0, 128 / 255]
 
-interpQuilt :: QExpr -> QuiltFun
-interpQuilt (LitColor color) _ _ = interpColor color
-interpQuilt (LitNum (I i)) _ _ = [fromIntegral i, fromIntegral i, fromIntegral i]
-interpQuilt (LitNum (D d)) _ _ = [d, d, d]
-interpQuilt (LitCoord X) x _ = [x, x, x]
-interpQuilt (LitCoord Y) _ y = [y, y, y]
-interpQuilt (LitBool T) _ _ = [1, 1, 1]
-interpQuilt (LitBool F) _ _ = [0, 0, 0]
-interpQuilt (LitColorTrip e1 e2 e3) x y = [i, j, k]
+type Env =
+  ((Double, Double), (Double, Double), (Double, Double))
+
+interpQuilt :: Env -> QExpr -> QuiltFun
+interpQuilt _ (LitColor color) _ _ = interpColor color
+interpQuilt _ (LitNum (I i)) _ _ = [fromIntegral i, fromIntegral i, fromIntegral i]
+interpQuilt _ (LitNum (D d)) _ _ = [d, d, d]
+interpQuilt _ (LitCoord X) x _ = [x, x, x]
+interpQuilt _ (LitCoord Y) _ y = [y, y, y]
+interpQuilt _ (LitBool T) _ _ = [1, 1, 1]
+interpQuilt _ (LitBool F) _ _ = [0, 0, 0]
+interpQuilt o (LitColorTrip e1 e2 e3) x y = [i, j, k]
   where
-    (i : _) = interpQuilt e1 x y
-    (j : _) = interpQuilt e2 x y
-    (k : _) = interpQuilt e3 x y
-interpQuilt (If test a b) x y = if pred == 1 then interpQuilt a x y else interpQuilt b x y
+    (i : _) = interpQuilt o e1 x y
+    (j : _) = interpQuilt o e2 x y
+    (k : _) = interpQuilt o e3 x y
+interpQuilt o (If test a b) x y = if pred == 1 then interpQuilt o a x y else interpQuilt o b x y
   where
-    (pred : _) = interpQuilt test x y
-interpQuilt (Unary Neg expr) x y = map negate $ interpQuilt expr x y
-interpQuilt (Unary Not expr) x y = map mapFn $ interpQuilt expr x y
+    (pred : _) = interpQuilt o test x y
+interpQuilt o (Unary Neg expr) x y = map negate $ interpQuilt o expr x y
+interpQuilt o (Unary Not expr) x y = map mapFn $ interpQuilt o expr x y
   where
     mapFn a = if a == 1 then 0 else 1
-interpQuilt (Arith Plus expr1 expr2) x y = vectorOp Plus a b
+interpQuilt o (Arith Plus expr1 expr2) x y = vectorOp Plus a b
   where
-    a = interpQuilt expr1 x y
-    b = interpQuilt expr2 x y
-interpQuilt (Arith Minus expr1 expr2) x y = vectorOp Minus a b
+    a = interpQuilt o expr1 x y
+    b = interpQuilt o expr2 x y
+interpQuilt o (Arith Minus expr1 expr2) x y = vectorOp Minus a b
   where
-    a = interpQuilt expr1 x y
-    b = interpQuilt expr2 x y
-interpQuilt (Arith Times expr1 expr2) x y = vectorOp Times a b
+    a = interpQuilt o expr1 x y
+    b = interpQuilt o expr2 x y
+interpQuilt o (Arith Times expr1 expr2) x y = vectorOp Times a b
   where
-    a = interpQuilt expr1 x y
-    b = interpQuilt expr2 x y
-interpQuilt (Arith Divide expr1 expr2) x y = vectorOp Divide a b
+    a = interpQuilt o expr1 x y
+    b = interpQuilt o expr2 x y
+interpQuilt o (Arith Divide expr1 expr2) x y = vectorOp Divide a b
   where
-    a = interpQuilt expr1 x y
-    b = interpQuilt expr2 x y
-interpQuilt (Comp Less expr1 expr2) x y = compOp Less a b
+    a = interpQuilt o expr1 x y
+    b = interpQuilt o expr2 x y
+interpQuilt o (Comp Less expr1 expr2) x y = compOp Less a b
   where
-    a = interpQuilt expr1 x y
-    b = interpQuilt expr2 x y
-interpQuilt (Comp Greater expr1 expr2) x y = compOp Greater a b
+    a = interpQuilt o expr1 x y
+    b = interpQuilt o expr2 x y
+interpQuilt o (Comp Greater expr1 expr2) x y = compOp Greater a b
   where
-    a = interpQuilt expr1 x y
-    b = interpQuilt expr2 x y
-interpQuilt (Comp GreaterEq expr1 expr2) x y = compOp GreaterEq a b
+    a = interpQuilt o expr1 x y
+    b = interpQuilt o expr2 x y
+interpQuilt o (Comp GreaterEq expr1 expr2) x y = compOp GreaterEq a b
   where
-    a = interpQuilt expr1 x y
-    b = interpQuilt expr2 x y
-interpQuilt (Comp LessEq expr1 expr2) x y = compOp LessEq a b
+    a = interpQuilt o expr1 x y
+    b = interpQuilt o expr2 x y
+interpQuilt o (Comp LessEq expr1 expr2) x y = compOp LessEq a b
   where
-    a = interpQuilt expr1 x y
-    b = interpQuilt expr2 x y
-interpQuilt (Comp Equal expr1 expr2) x y = compOp Equal a b
+    a = interpQuilt o expr1 x y
+    b = interpQuilt o expr2 x y
+interpQuilt o (Comp Equal expr1 expr2) x y = compOp Equal a b
   where
-    a = interpQuilt expr1 x y
-    b = interpQuilt expr2 x y
-interpQuilt (Bool And expr1 expr2) x y = boolOp And a b
+    a = interpQuilt o expr1 x y
+    b = interpQuilt o expr2 x y
+interpQuilt o (Bool And expr1 expr2) x y = boolOp And a b
   where
-    a = interpQuilt expr1 x y
-    b = interpQuilt expr2 x y
-interpQuilt (Bool Or expr1 expr2) x y = boolOp Or a b
+    a = interpQuilt o expr1 x y
+    b = interpQuilt o expr2 x y
+interpQuilt o (Bool Or expr1 expr2) x y = boolOp Or a b
   where
-    a = interpQuilt expr1 x y
-    b = interpQuilt expr2 x y
-interpQuilt (Quilt expr1 expr2 expr3 expr4) x y = undefined
+    a = interpQuilt o expr1 x y
+    b = interpQuilt o expr2 x y
+interpQuilt e@((ox, oy), (l, r), (u, lw)) (Quilt expr1 expr2 expr3 expr4) x y = quilt e x y a b c d
   where
-    a = interpQuilt expr1 x y
-    b = interpQuilt expr2 x y
-    c = interpQuilt expr3 x y
-    d = interpQuilt expr4 x y
+    a = interpQuilt ((l / 2, u / 2), (l, ox), (u, oy)) expr1 x y
+    b = interpQuilt ((r / 2, u / 2), (ox, r), (u, oy)) expr2 x y
+    c = interpQuilt ((l / 2, lw / 2), (l, ox), (oy, lw)) expr3 x y
+    d = interpQuilt ((r / 2, lw / 2), (ox, r), (oy, lw)) expr4 x y
+
+inQuilt :: Env -> Double -> Double -> Bool
+inQuilt (_, (left, right), (upper, lower)) x y =
+  x >= left && x <= right && y >= lower && y <= upper
+
+quilt :: Env -> Double -> Double -> Color -> Color -> Color -> Color -> Color
+quilt e@((ox, oy), (left, right), (upper, lower)) x y a b c d
+  | inQuilt e x y && x >= ox = if y >= oy then b else d
+  | inQuilt e x y && y >= oy = a
+  | inQuilt e x y = c
+  | otherwise = []
 
 vectorOp :: ArithOp -> Color -> Color -> Color
 vectorOp Plus [x, y, z] [x', y', z'] = [x + x', y + y', z + z']
@@ -373,4 +388,4 @@ boolOp Or [x, y, z] [x', _, _] = [bool2Double (||) a b, y, z]
 evalQuilt :: String -> Either String QuiltFun
 evalQuilt s = case qexpr s of
   Left err -> Left $ show err
-  Right ast -> Right $ interpQuilt ast
+  Right ast -> Right $ interpQuilt ((0, 0), (-1, 1), (1, -1)) ast
