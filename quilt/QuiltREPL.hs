@@ -4,7 +4,7 @@ import Codec.Picture
 import Control.Monad.State
 import Data.Char (isDigit)
 import GHC.Word (Word8)
-import Quilt (Color, QuiltFun, evalQuilt)
+import Quilt (Color, QuiltFun, evalQuilt, infer, qexpr)
 import System.Console.Haskeline
 
 ------------------------------------------------------------
@@ -18,6 +18,7 @@ helpMsg :: String
 helpMsg =
   unlines
     [ "Enter an expression to generate a 256x256 image and save it to quilt.png.",
+      ":type <expr>",
       ":size        - report the current size used by the :save command.",
       ":size <int>  - set the size used by the :save command.",
       ":save <file> - save a :size x :size copy of the most recent expression to <file>.png and <file>.txt",
@@ -69,8 +70,19 @@ quiltREPL = do
             ":help" -> lift (outputStrLn helpMsg) >> return True
             ":size" -> sizeCmd rest >> return True
             ":save" -> saveCmd rest >> return True
+            ":type" -> typeCmd rest >> return True
             _ -> eval s >> return True
           when shouldLoop loop
+
+typeCmd :: [String] -> QuiltM ()
+typeCmd ss = t
+  where
+    s = unwords ss
+    t = case qexpr s of
+      Left err -> lift $ outputStrLn (show err)
+      Right ast -> case infer ast of
+        Left err -> lift $ outputStrLn $ show err
+        Right t -> lift $ outputStrLn (show t)
 
 sizeCmd :: [String] -> QuiltM ()
 sizeCmd [] = do

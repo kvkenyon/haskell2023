@@ -1,6 +1,7 @@
 -- CSCI 360, Fall 2016
 -- Project 3: the Quilt language
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE InstanceSigs #-}
 
 module Quilt where
 
@@ -383,9 +384,72 @@ boolOp Or [x, y, z] [x', _, _] = [bool2Double (||) a b, y, z]
     a = x == 1
     b = x' == 1
 
+-- | Type Checker
+data Type = TNumeric | TBool | TColor | TCoord
+  deriving (Show, Eq)
+
+data TypeError where
+  -- Expr w/ error, Expected, Actual
+  TypeError :: QExpr -> Type -> Type -> TypeError
+
+instance Show TypeError where
+  show :: TypeError -> String
+  show (TypeError _ exp act) = "Type Error: In <expr> expected type " ++ show exp ++ " but got type " ++ show act ++ "."
+
+inColorNumeric :: Type -> QExpr -> Either TypeError ()
+inColorNumeric TNumeric _ = Right ()
+inColorNumeric TColor _ = Right ()
+inColorNumeric ty q = Left $ TypeError q TColor ty
+
+infer :: QExpr -> Either TypeError Type
+infer (LitColor _) = Right TColor
+infer (LitNum _) = Right TNumeric
+infer (LitCoord _) = Right TNumeric
+infer (LitBool _) = Right TBool
+infer (LitColorTrip q1 q2 q3) =
+  check q1 TNumeric
+    >> check q2 TNumeric
+    >> check q3 TNumeric
+    >> Right TColor
+infer (If test q1 q2) =
+  check test TBool
+    >> infer q1
+    >>= (\ty -> check q2 ty >> Right ty)
+-- TODO: TypeError should show expect type A or type B but got Type C
+infer (Unary Neg q1) =
+  infer q1
+    >>= ( \ty -> case ty of
+            TNumeric -> Right TNumeric
+            TColor -> Right TColor
+            _ -> Left $ TypeError q1 TNumeric ty
+        )
+infer (Unary Not q1) = check q1 TBool >> Right TBool
+infer (Arith _ q1 q2) = do
+  ty1 <- infer q1
+  ty2 <- infer q2
+  inColorNumeric ty1 q1 >> inColorNumeric ty2 q2 >> Right TNumeric
+infer (Comp _ q1 q2) = check q1 TNumeric >> check q2 TNumeric >> Right TBool
+infer (Bool _ q1 q2) = check q1 TBool >> check q2 TBool >> Right TBool
+infer (Quilt q1 q2 q3 q4) = do
+  ty1 <- infer q1
+  ty2 <- infer q2
+  ty3 <- infer q3
+  ty4 <- infer q4
+  if ty1 == ty2 && ty3 == ty4 && ty1 == ty3
+    then case ty1 of
+      TNumeric -> Right TNumeric
+      TBool -> Right TBool
+      _ -> Right TColor
+    else inColorNumeric ty1 q1 >> inColorNumeric ty2 q2 >> inColorNumeric ty3 q3 >> inColorNumeric ty4 q4 >> Right TColor
+
+check :: QExpr -> Type -> Either TypeError ()
+check q ty = infer q >>= (\ty2 -> if ty == ty2 then Right () else Left $ TypeError q ty ty2)
+
 -- | Parse the string into a QExpr or produce a ParseError
 --   On success we interpret the AST into a Quilt Function
 evalQuilt :: String -> Either String QuiltFun
 evalQuilt s = case qexpr s of
   Left err -> Left $ show err
-  Right ast -> Right $ interpQuilt ((0, 0), (-1, 1), (1, -1)) ast
+  Right ast -> case infer ast of
+    Left tyErr -> Left $ show tyErr
+    Right ty -> Right $ interpQuilt ((0, 0), (-1, 1), (1, -1)) ast

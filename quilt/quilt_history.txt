@@ -1,4 +1,35 @@
 :q
+[(x+1)/2, (y+1)/2, 0.5]
+:q
+[0.5,0.5,0.5]
+(x+1)/2
+[(x+1)/2, (y+1)/2, 0.5]
+quilt 0.4 yellow red (quilt green orange blue purple)
+if 1 == 2 then 1 else 1
+if 1 then 1 else 1
+1 + 1
+1 + True
+:q
+quilt 0.4 yellow red (quilt green orange blue purple)
+[(x+1)/2, (y+1)/2, 0.5]
+(x+1)/2*red + (1-(x+1)/2)*blue
+if x < y then red else blue 
+red + (blue + orange)
+red + blue
+blue
+red + purple
+red + purple
+yellow + True
+yellow + False
+1 + True
+quilt 0.4 yellow red (quilt green orange blue purple)
+red * 1243
+red * 2
+red + purple
+red + orange
+red + bluye
+quilt 0.4 yellow red (quilt green orange blue purple)
+:q
 quilt 0.4 yellow red (quilt green orange blue purple)
 :q
 Lq
