@@ -11,6 +11,8 @@ import Text.Parsec.Expr
 import qualified Text.Parsec.Prim as P
 import Text.Parsec.Token (reservedOp, symbol)
 
+-- Syntax
+
 -- | Color Literals represent ROYGBIV values
 --   They will be interpreted by triples of floating point numbers (Color)
 --   Each will be a constant
@@ -84,6 +86,8 @@ data QExpr where
   Bool :: BoolOp -> QExpr -> QExpr -> QExpr
   Quilt :: QExpr -> QExpr -> QExpr -> QExpr -> QExpr
   deriving (Show)
+
+-- Parser
 
 lexer :: TokenParser u
 lexer =
@@ -185,13 +189,13 @@ parseBool = (reserved "True" >> return (LitBool T)) <|> (reserved "False" >> ret
 parseColorTriple :: Parser QExpr
 parseColorTriple = do
   symbol lexer "["
-  a <- qexpr
+  a <- parseQExpr
   whiteSpace
   symbol lexer ","
-  b <- qexpr
+  b <- parseQExpr
   whiteSpace
   symbol lexer ","
-  c <- qexpr
+  c <- parseQExpr
   whiteSpace
   symbol lexer "]"
   return $ LitColorTrip a b c
@@ -200,15 +204,15 @@ parseIf :: Parser QExpr
 parseIf = do
   reserved "if"
   whiteSpace
-  test <- qexpr
+  test <- parseQExpr
   whiteSpace
   reserved "then"
   whiteSpace
-  a <- qexpr
+  a <- parseQExpr
   whiteSpace
   reserved "else"
   whiteSpace
-  b <- qexpr
+  b <- parseQExpr
   whiteSpace
   return $ If test a b
 
@@ -216,13 +220,13 @@ parseQuilt :: Parser QExpr
 parseQuilt = do
   reserved "quilt"
   whiteSpace
-  a <- qexpr
+  a <- parseQExpr
   whiteSpace
-  b <- qexpr
+  b <- parseQExpr
   whiteSpace
-  c <- qexpr
+  c <- parseQExpr
   whiteSpace
-  d <- qexpr
+  d <- parseQExpr
   whiteSpace
   return $ Quilt a b c d
 
@@ -230,7 +234,7 @@ parseQExprAtom :: Parser QExpr
 parseQExprAtom = parseColor <|> parseNumber <|> parseBool <|> parseCoord
 
 term :: P.ParsecT String () I.Identity QExpr
-term = parens qexpr <|> parseQExprAtom <|> parseColorTriple <|> parseIf <|> parseQuilt
+term = parens parseQExpr <|> parseQExprAtom <|> parseColorTriple <|> parseIf <|> parseQuilt
 
 table :: [[Operator String () I.Identity QExpr]]
 table =
@@ -246,18 +250,127 @@ table =
     [binary "&&" (Bool And) AssocLeft, binary "||" (Bool Or) AssocLeft]
   ]
 
-qexpr :: P.ParsecT String () I.Identity QExpr
-qexpr = buildExpressionParser table term
+parseQExpr :: P.ParsecT String () I.Identity QExpr
+parseQExpr = buildExpressionParser table term
 
-parseQExpr :: String -> Either ParseError QExpr
-parseQExpr = parse $ getWhiteSpace lexer *> qexpr <* eof
+qexpr :: String -> Either ParseError QExpr
+qexpr = parse $ getWhiteSpace lexer *> parseQExpr <* eof
+
+-- Interpreter
 
 -- | A quilt function produces a Color for any given location.  The
 --   parameters are x and y coordinates in the range [-1,1].
 type QuiltFun = Double -> Double -> Color
 
--- | Right now, this function ignores the input and simply produces a
---   blue image.  Obviously, you should make this function more
---   interesting!
+interpColor :: ColorLit -> Color
+interpColor Red = [1, 0, 0]
+interpColor Orange = [1, 165 / 255, 0]
+interpColor Yellow = [1, 1, 0]
+interpColor Green = [0, 128 / 255, 0]
+interpColor Blue = [0, 0, 1]
+interpColor Indigo = [75 / 255, 0, 130 / 255]
+interpColor Violet = [128 / 255, 0, 128 / 255]
+
+interpQuilt :: QExpr -> QuiltFun
+interpQuilt (LitColor color) _ _ = interpColor color
+interpQuilt (LitNum (I i)) _ _ = [fromIntegral i, fromIntegral i, fromIntegral i]
+interpQuilt (LitNum (D d)) _ _ = [d, d, d]
+interpQuilt (LitCoord X) x _ = [x, x, x]
+interpQuilt (LitCoord Y) _ y = [y, y, y]
+interpQuilt (LitBool T) _ _ = [1, 1, 1]
+interpQuilt (LitBool F) _ _ = [0, 0, 0]
+interpQuilt (LitColorTrip e1 e2 e3) x y = [i, j, k]
+  where
+    (i : _) = interpQuilt e1 x y
+    (j : _) = interpQuilt e2 x y
+    (k : _) = interpQuilt e3 x y
+interpQuilt (If test a b) x y = if pred == 1 then interpQuilt a x y else interpQuilt b x y
+  where
+    (pred : _) = interpQuilt test x y
+interpQuilt (Unary Neg expr) x y = map negate $ interpQuilt expr x y
+interpQuilt (Unary Not expr) x y = map mapFn $ interpQuilt expr x y
+  where
+    mapFn a = if a == 1 then 0 else 1
+interpQuilt (Arith Plus expr1 expr2) x y = vectorOp Plus a b
+  where
+    a = interpQuilt expr1 x y
+    b = interpQuilt expr2 x y
+interpQuilt (Arith Minus expr1 expr2) x y = vectorOp Minus a b
+  where
+    a = interpQuilt expr1 x y
+    b = interpQuilt expr2 x y
+interpQuilt (Arith Times expr1 expr2) x y = vectorOp Times a b
+  where
+    a = interpQuilt expr1 x y
+    b = interpQuilt expr2 x y
+interpQuilt (Arith Divide expr1 expr2) x y = vectorOp Divide a b
+  where
+    a = interpQuilt expr1 x y
+    b = interpQuilt expr2 x y
+interpQuilt (Comp Less expr1 expr2) x y = compOp Less a b
+  where
+    a = interpQuilt expr1 x y
+    b = interpQuilt expr2 x y
+interpQuilt (Comp Greater expr1 expr2) x y = compOp Greater a b
+  where
+    a = interpQuilt expr1 x y
+    b = interpQuilt expr2 x y
+interpQuilt (Comp GreaterEq expr1 expr2) x y = compOp GreaterEq a b
+  where
+    a = interpQuilt expr1 x y
+    b = interpQuilt expr2 x y
+interpQuilt (Comp LessEq expr1 expr2) x y = compOp LessEq a b
+  where
+    a = interpQuilt expr1 x y
+    b = interpQuilt expr2 x y
+interpQuilt (Comp Equal expr1 expr2) x y = compOp Equal a b
+  where
+    a = interpQuilt expr1 x y
+    b = interpQuilt expr2 x y
+interpQuilt (Bool And expr1 expr2) x y = boolOp And a b
+  where
+    a = interpQuilt expr1 x y
+    b = interpQuilt expr2 x y
+interpQuilt (Bool Or expr1 expr2) x y = boolOp Or a b
+  where
+    a = interpQuilt expr1 x y
+    b = interpQuilt expr2 x y
+interpQuilt (Quilt expr1 expr2 expr3 expr4) x y = undefined
+  where
+    a = interpQuilt expr1 x y
+    b = interpQuilt expr2 x y
+    c = interpQuilt expr3 x y
+    d = interpQuilt expr4 x y
+
+vectorOp :: ArithOp -> Color -> Color -> Color
+vectorOp Plus [x, y, z] [x', y', z'] = [x + x', y + y', z + z']
+vectorOp Minus [x, y, z] [x', y', z'] = [x - x', y - y', z - z']
+vectorOp Times [x, y, z] [x', y', z'] = [x * x', y * y', z * z']
+vectorOp Divide [x, y, z] [x', y', z'] = [x / x', y / y', z / z']
+
+bool2Double :: (Ord a) => (a -> a -> Bool) -> a -> a -> Double
+bool2Double op x x' = if x `op` x' then 1 else 0
+
+compOp :: CompOp -> Color -> Color -> Color
+compOp Less [x, y, z] [x', y', z'] = [bool2Double (<) x x', bool2Double (<) y y', bool2Double (<) z z']
+compOp Greater [x, y, z] [x', y', z'] = [bool2Double (>) x x', bool2Double (>) y y', bool2Double (>) z z']
+compOp Equal [x, y, z] [x', y', z'] = [bool2Double (==) x x', bool2Double (==) y y', bool2Double (==) z z']
+compOp GreaterEq [x, y, z] [x', y', z'] = [bool2Double (>=) x x', bool2Double (>=) y y', bool2Double (>=) z z']
+compOp LessEq [x, y, z] [x', y', z'] = [bool2Double (<=) x x', bool2Double (<=) y y', bool2Double (<=) z z']
+
+boolOp :: BoolOp -> Color -> Color -> Color
+boolOp And [x, y, z] [x', _, _] = [bool2Double (&&) a b, y, z]
+  where
+    a = x == 1
+    b = x' == 1
+boolOp Or [x, y, z] [x', _, _] = [bool2Double (||) a b, y, z]
+  where
+    a = x == 1
+    b = x' == 1
+
+-- | Parse the string into a QExpr or produce a ParseError
+--   On success we interpret the AST into a Quilt Function
 evalQuilt :: String -> Either String QuiltFun
-evalQuilt s = Right $ \x y -> [0, 0, 1]
+evalQuilt s = case qexpr s of
+  Left err -> Left $ show err
+  Right ast -> Right $ interpQuilt ast
