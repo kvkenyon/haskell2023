@@ -60,6 +60,7 @@ data ArithOp where
   Minus :: ArithOp
   Times :: ArithOp
   Divide :: ArithOp
+  Mod :: ArithOp
   deriving (Show)
 
 data CompOp where
@@ -75,6 +76,17 @@ data BoolOp where
   Or :: BoolOp
   deriving (Show)
 
+data Func where
+  Sin :: Func
+  --   Cos :: Func
+  --   Sqrt :: Func
+  --   Exp :: Func
+  --   Floor :: Func
+  --   Ceil :: Func
+  --   Abs :: Func
+  --   Log :: Func
+  deriving (Show)
+
 data QExpr where
   LitColor :: ColorLit -> QExpr
   LitNum :: Number -> QExpr
@@ -84,6 +96,7 @@ data QExpr where
   If :: QExpr -> QExpr -> QExpr -> QExpr
   Unary :: UOp -> QExpr -> QExpr
   Arith :: ArithOp -> QExpr -> QExpr -> QExpr
+  ArithFunc :: Func -> QExpr -> QExpr
   Comp :: CompOp -> QExpr -> QExpr -> QExpr
   Bool :: BoolOp -> QExpr -> QExpr -> QExpr
   Quilt :: QExpr -> QExpr -> QExpr -> QExpr -> QExpr
@@ -240,7 +253,8 @@ term = parens parseQExpr <|> parseQExprAtom <|> parseColorTriple <|> parseIf <|>
 
 table :: [[Operator String () I.Identity QExpr]]
 table =
-  [ [prefix "-" (Unary Neg), prefix "!" (Unary Not)],
+  [ [prefix "sin" (ArithFunc Sin)],
+    [prefix "-" (Unary Neg), prefix "!" (Unary Not)],
     [binary "*" (Arith Times) AssocLeft, binary "/" (Arith Divide) AssocLeft],
     [binary "+" (Arith Plus) AssocLeft, binary "-" (Arith Minus) AssocLeft],
     [ binary "==" (Comp Equal) AssocNone,
@@ -312,6 +326,7 @@ interpQuilt o (Arith Divide expr1 expr2) x y = vectorOp Divide a b
   where
     a = interpQuilt o expr1 x y
     b = interpQuilt o expr2 x y
+interpQuilt o (ArithFunc Sin expr1) x y = funcOp Sin (interpQuilt o expr1 x y)
 interpQuilt o (Comp Less expr1 expr2) x y = compOp Less a b
   where
     a = interpQuilt o expr1 x y
@@ -357,6 +372,9 @@ quilt e@((ox, oy), (left, right), (upper, lower)) x y a b c d
   | inQuilt e x y && y >= oy = a
   | inQuilt e x y = c
   | otherwise = []
+
+funcOp :: Func -> Color -> Color
+funcOp Sin [r, g, b] = [sin r, sin g, sin b]
 
 vectorOp :: ArithOp -> Color -> Color -> Color
 vectorOp Plus [x, y, z] [x', y', z'] = [x + x', y + y', z + z']
@@ -428,6 +446,7 @@ infer (Arith _ q1 q2) = do
   ty1 <- infer q1
   ty2 <- infer q2
   inColorNumeric ty1 q1 >> inColorNumeric ty2 q2 >> Right TNumeric
+infer (ArithFunc Sin q1) = infer q1 >>= \ty -> inColorNumeric ty q1 >> Right TNumeric
 infer (Comp _ q1 q2) = check q1 TNumeric >> check q2 TNumeric >> Right TBool
 infer (Bool _ q1 q2) = check q1 TBool >> check q2 TBool >> Right TBool
 infer (Quilt q1 q2 q3 q4) = do
