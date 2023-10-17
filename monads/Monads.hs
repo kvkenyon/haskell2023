@@ -8,6 +8,7 @@ import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Except
 import Control.Monad.Trans.State
 import Control.Monad.Trans.Writer (WriterT)
+import Control.Monad.Trans.Writer.Lazy (runWriterT, tell)
 
 tick :: State Int Int
 tick = do
@@ -257,3 +258,45 @@ rASt = do
   crush (+)
 
 type StackProgW el a = ExceptT StackError (WriterT [String] (State [el])) a
+
+pushW :: (Show el) => el -> StackProgW el ()
+pushW x = do
+  stack <- lift $ lift get
+  (lift . lift . put) (x : stack)
+  lift $ tell ["Pushed " ++ show x]
+
+popW :: (Show el) => StackProgW el el
+popW = do
+  stack <- lift $ lift get
+  case stack of
+    [] -> throwE Underflow
+    (x : xs) -> do
+      lift $ lift $ put xs
+      lift $ tell ["Popped " ++ show x]
+      return x
+
+sizeW :: (Show el) => StackProgW el Int
+sizeW = do
+  stack <- lift $ lift get
+  let sz = length stack
+  lift $ tell ["Size is " ++ show sz]
+  return sz
+
+peekW :: (Show el) => StackProgW el el
+peekW = do
+  stack <- lift $ lift get
+  case stack of
+    [] -> throwE Underflow
+    (x : _) -> do
+      lift $ tell ["Peeked " ++ show x]
+      return x
+
+interpStackProgW :: (Show el) => StackProgAST el a -> StackProgW el a
+interpStackProgW (Return x) = return x
+interpStackProgW (Push x prog) = pushW x >> interpStackProgW prog
+interpStackProgW (Pop g) = popW >>= \x -> interpStackProgW $ g x
+interpStackProgW (Size g) = sizeW >>= \x -> interpStackProgW $ g x
+interpStackProgW (Peek g) = peekW >>= \x -> interpStackProgW $ g x
+
+runAsStackProgW :: (Show el) => StackProgAST el a -> ((Either StackError a, [String]), [el])
+runAsStackProgW s = runState (runWriterT $ runExceptT $ interpStackProgW s) []
