@@ -43,7 +43,7 @@ getBinDir, getLibDir, getDynLibDir, getDataDir, getLibexecDir, getSysconfDir :: 
 
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
 bindir     = "/Users/kevin/dev/haskell/haskell_in_depth/.stack-work/install/aarch64-osx/10b7724d80ef68265e84645f266c97e67a35a3ea8627a6ff4960800ba7b3b260/9.2.8/bin"
-libdir     = "/Users/kevin/dev/haskell/haskell_in_depth/.stack-work/install/aarch64-osx/10b7724d80ef68265e84645f266c97e67a35a3ea8627a6ff4960800ba7b3b260/9.2.8/lib/aarch64-osx-ghc-9.2.8/radar-0.1.0.0-2NS7pmXZ9pD8wFgQ3kbHKB-radar"
+libdir     = "/Users/kevin/dev/haskell/haskell_in_depth/.stack-work/install/aarch64-osx/10b7724d80ef68265e84645f266c97e67a35a3ea8627a6ff4960800ba7b3b260/9.2.8/lib/aarch64-osx-ghc-9.2.8/radar-0.1.0.0-85CwHfNmr4oJaKyN2mceVp-radar"
 dynlibdir  = "/Users/kevin/dev/haskell/haskell_in_depth/.stack-work/install/aarch64-osx/10b7724d80ef68265e84645f266c97e67a35a3ea8627a6ff4960800ba7b3b260/9.2.8/lib/aarch64-osx-ghc-9.2.8"
 datadir    = "/Users/kevin/dev/haskell/haskell_in_depth/.stack-work/install/aarch64-osx/10b7724d80ef68265e84645f266c97e67a35a3ea8627a6ff4960800ba7b3b260/9.2.8/share/aarch64-osx-ghc-9.2.8/radar-0.1.0.0"
 libexecdir = "/Users/kevin/dev/haskell/haskell_in_depth/.stack-work/install/aarch64-osx/10b7724d80ef68265e84645f266c97e67a35a3ea8627a6ff4960800ba7b3b260/9.2.8/libexec/aarch64-osx-ghc-9.2.8/radar-0.1.0.0"

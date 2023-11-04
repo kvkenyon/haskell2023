@@ -30,6 +30,16 @@
   (major1) == 0 && (major2) <  6 || \
   (major1) == 0 && (major2) == 6 && (minor) <= 3)
 #endif /* MIN_VERSION_fmt */
+/* package random-1.2.1.1 */
+#ifndef VERSION_random
+#define VERSION_random "1.2.1.1"
+#endif /* VERSION_random */
+#ifndef MIN_VERSION_random
+#define MIN_VERSION_random(major1,major2,minor) (\
+  (major1) <  1 || \
+  (major1) == 1 && (major2) <  2 || \
+  (major1) == 1 && (major2) == 2 && (minor) <= 1)
+#endif /* MIN_VERSION_random */
 
 /* tool gcc-14.0.3 */
 #ifndef TOOL_VERSION_gcc
@@ -113,7 +123,7 @@
 #endif /* MIN_TOOL_VERSION_runghc */
 
 #ifndef CURRENT_COMPONENT_ID
-#define CURRENT_COMPONENT_ID "radar-0.1.0.0-2NS7pmXZ9pD8wFgQ3kbHKB-radar"
+#define CURRENT_COMPONENT_ID "radar-0.1.0.0-85CwHfNmr4oJaKyN2mceVp-radar"
 #endif /* CURRENT_COMPONENT_ID */
 #ifndef CURRENT_PACKAGE_VERSION
 #define CURRENT_PACKAGE_VERSION "0.1.0.0"

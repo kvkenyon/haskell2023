@@ -5,7 +5,9 @@
 
 module TypeClasses where
 
+import Control.Monad (replicateM)
 import Fmt
+import System.Random.Stateful
 
 deriving instance Ord Turn
 
@@ -73,7 +75,7 @@ rotateManySteps :: Direction -> [Turn] -> [Direction]
 rotateManySteps = scanl (flip rotate)
 
 orientMany :: [Direction] -> [Turn]
-orientMany d@(_ : _ : _) = zipWith orient (tail d) d
+orientMany d@(_ : _ : _) = zipWith orient d (tail d)
 orientMany _ = []
 
 rotateFromFile :: Direction -> FilePath -> IO ()
@@ -90,4 +92,45 @@ rotateFromFile dir fname =
 
     fmt $ nameF "Intermediate directions" (unwordsF dirs)
 
--- orientFromFile :: FilePath -> IO ()
+orientFromFile :: FilePath -> IO ()
+orientFromFile fname = do
+  f <- readFile fname
+  let dirs = map read $ lines f
+      turns = orientMany dirs
+  fmt $ nameF "All turns: " (unwordsF turns)
+
+instance UniformRange Turn where
+  uniformRM :: (StatefulGen g m) => (Turn, Turn) -> g -> m Turn
+  uniformRM (lo, hi) rng = do
+    res <- uniformRM (fromEnum lo :: Int, fromEnum hi) rng
+    pure $ toEnum res
+
+instance Uniform Turn where
+  uniformM :: (StatefulGen g m) => g -> m Turn
+  uniformM = uniformRM (minBound, maxBound)
+
+instance UniformRange Direction where
+  uniformRM :: (StatefulGen g m) => (Direction, Direction) -> g -> m Direction
+  uniformRM (lo, hi) rng = do
+    toEnum <$> uniformRM (fromEnum lo :: Int, fromEnum hi :: Int) rng
+
+instance Uniform Direction where
+  uniformM :: (StatefulGen g m) => g -> m Direction
+  uniformM = uniformRM (minBound, maxBound)
+
+uniformIO :: (Uniform a) => IO a
+uniformIO = getStdRandom uniform
+
+uniformsIO :: (Uniform a) => Int -> IO [a]
+uniformsIO n = replicateM n uniformIO
+
+randomTurns :: Int -> IO [Turn]
+randomTurns = uniformsIO
+
+randomDirections :: Int -> IO [Direction]
+randomDirections = uniformsIO
+
+writeRandomFile :: (Uniform a, Show a) => Int -> (Int -> IO [a]) -> FilePath -> IO ()
+writeRandomFile n gen fname = do
+  xs <- gen n
+  writeFile fname $ unlines $ map show xs
